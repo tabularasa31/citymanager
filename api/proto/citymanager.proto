@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package citymanager;
+
+option go_package = ".;proto";
+
+service CityManager {
+  rpc AddCity(AddCityRequest) returns (AddCityResponse) {}
+  rpc RemoveCity(RemoveCityRequest) returns (RemoveCityResponse) {}
+  rpc GetCity(GetCityRequest) returns (GetCityResponse) {}
+  rpc GetNearestCities(GetNearestCitiesRequest) returns (GetNearestCitiesResponse) {}
+}
+
+message City {
+  string name = 1;
+  double latitude = 2;
+  double longitude = 3;
+}
+
+message AddCityRequest {
+  string name = 1;
+}
+
+message AddCityResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message RemoveCityRequest {
+  string name = 1;
+}
+
+message RemoveCityResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message GetCityRequest {
+  string name = 1;
+}
+
+message GetCityResponse {
+  City city = 1;
+}
+
+message GetNearestCitiesRequest {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message GetNearestCitiesResponse {
+  repeated City cities = 1;
+}
