@@ -120,7 +120,14 @@ func haversine(lat1, lon1, lat2, lon2 float64) float64 {
 
 	a := math.Sin(dLat/2)*math.Sin(dLat/2) +
 		math.Sin(dLon/2)*math.Sin(dLon/2)*math.Cos(lat1)*math.Cos(lat2)
+
+	// Проверка на случай точек-антиподов (точки почти на противоположных сторонах Земли)
+	if a > 1.0 {
+		a = 1.0
+	}
+
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+
 	return R * c
 }
 
