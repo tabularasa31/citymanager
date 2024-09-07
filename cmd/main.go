@@ -16,8 +16,7 @@ import (
 )
 
 func main() {
-	port := ":50051"
-	lis, err := net.Listen("tcp", port)
+	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -37,7 +36,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		fmt.Printf("gRPC server is running and listening on %s%s...", ip, port)
+		fmt.Printf("gRPC server is running and listening on %s:50051...", ip)
 		if err := s.Serve(lis); err != nil {
 			fmt.Printf("Failed to serve: %v\n", err)
 		}
