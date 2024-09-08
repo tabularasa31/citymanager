@@ -44,12 +44,12 @@ func TestOpenStreetMapGeocoderError(t *testing.T) {
 	defer server.Close()
 
 	// Создаем геокодер и устанавливаем тестовый клиент и URL
-	geocoder := geocoder.NewOpenStreetMapGeocoder()
-	geocoder.SetHTTPClient(server.Client())
-	geocoder.SetBaseURL(server.URL)
+	geoClient := geocoder.NewOpenStreetMapGeocoder()
+	geoClient.SetHTTPClient(server.Client())
+	geoClient.SetBaseURL(server.URL)
 
 	ctx := context.Background()
-	_, _, err := geocoder.Geocode(ctx, "InvalidCity")
+	_, _, err := geoClient.Geocode(ctx, "InvalidCity")
 
 	assert.Error(t, err)
 }

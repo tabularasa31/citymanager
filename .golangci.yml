@@ -2,7 +2,7 @@ run:
   tests: true
   build-tags:
     - bench
-    -
+
 linters-settings:
   funlen:
     lines: 150
