@@ -2,29 +2,33 @@ package test
 
 import (
 	"context"
-	"github.com/tabularasa31/citymanager/internal/geocoder"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/tabularasa31/citymanager/internal/geocoder"
 )
 
 func TestOpenStreetMapGeocoder(t *testing.T) {
 	// Создаем тестовый HTTP сервер с более реалистичными данными
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`[{"lat":"51.4893335","lon":"-0.14405508452768728"}]`))
+		_, err := w.Write([]byte(`[{"lat":"51.4893335","lon":"-0.14405508452768728"}]`))
+		if err != nil {
+			log.Printf("Error writing response: %v", err)
+		}
 	}))
 	defer server.Close()
 
 	// Создаем геокодер и устанавливаем тестовый клиент и URL
-	geocoder := geocoder.NewOpenStreetMapGeocoder()
-	geocoder.SetHTTPClient(server.Client())
-	geocoder.SetBaseURL(server.URL)
+	geoClient := geocoder.NewOpenStreetMapGeocoder()
+	geoClient.SetHTTPClient(server.Client())
+	geoClient.SetBaseURL(server.URL)
 
 	ctx := context.Background()
-	lat, lon, err := geocoder.Geocode(ctx, "London")
+	lat, lon, err := geoClient.Geocode(ctx, "London")
 
 	assert.NoError(t, err)
 	// Используем более мягкую проверку с допустимым отклонением
@@ -34,7 +38,7 @@ func TestOpenStreetMapGeocoder(t *testing.T) {
 
 func TestOpenStreetMapGeocoderError(t *testing.T) {
 	// Создаем тестовый HTTP сервер, который возвращает ошибку
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}))
 	defer server.Close()

@@ -2,10 +2,10 @@ package storage
 
 import (
 	"errors"
-	"golang.org/x/net/context"
 	"sync"
 
 	pb "github.com/tabularasa31/citymanager/api/gen"
+	"golang.org/x/net/context"
 )
 
 type Storage interface {
@@ -80,6 +80,5 @@ func (s *InMemoryStorage) GetAllCities(ctx context.Context) ([]*pb.City, error) 
 			cities = append(cities, city)
 		}
 		return cities, nil
-
 	}
 }

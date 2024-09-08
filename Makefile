@@ -1,13 +1,10 @@
-# Переменные
 BINARY_NAME=citymanager
 DOCKER_IMAGE_NAME=citymanager-image
 DOCKER_CONTAINER_NAME=citymanager-container
 
-# Команды Go
 GOBASE=$(shell pwd)
 GOBIN=$(GOBASE)/bin
 
-# Цели
 .PHONY: all build clean run test docker-build docker-run docker-stop
 
 all: build
@@ -42,30 +39,29 @@ docker-stop:
 	docker stop $(DOCKER_CONTAINER_NAME)
 	docker rm $(DOCKER_CONTAINER_NAME)
 
-# Генерация protobuf файлов
+
 proto:
 	echo "Generating protobuf files..."
-	protoc --go_out=. --go_opt=paths=source_relative \
-		--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-		proto/citymanager.proto
+	protoc - protoc -I api/proto api/proto/*.proto --go_out=./api/gen --go_opt=paths=source_relative --go-grpc_out=./api/gen
 
-# Запуск линтера
+
 install-lint-deps:
-	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.50.1
+	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
 
 lint: install-lint-deps ### check by golangci linter
-	echo "Running linter..."
+	echo "Starting linters"
 	golangci-lint run
 
-# Обновление зависимостей
+#install-lint-deps:
+#	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.50.1
+#
+#lint: install-lint-deps ### check by golangci linter
+#	echo "Running linter..."
+#	golangci-lint run
+
 deps:
 	echo "Updating dependencies..."
 	go mod tidy
-
-# Запуск в режиме разработки (с автоматической перезагрузкой)
-dev:
-	echo "Running in development mode..."
-	air
 
 # Запуск в Docker Compose
 up:
@@ -76,7 +72,6 @@ down:
 	echo "Stopping services with Docker Compose..."
 	docker-compose down
 
-# Помощь
 help:
 	echo "Available commands:"
 	echo "  make build          - Build the project"
@@ -89,6 +84,5 @@ help:
 	echo "  make proto          - Generate protobuf files"
 	echo "  make lint           - Run linter"
 	echo "  make deps           - Update dependencies"
-	echo "  make dev            - Run in development mode with auto-reload"
 	echo "  make up   			- Start services with Docker Compose"
 	echo "  make down 			- Stop services with Docker Compose"

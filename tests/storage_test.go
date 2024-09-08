@@ -2,11 +2,11 @@ package test
 
 import (
 	"context"
-	"github.com/tabularasa31/citymanager/internal/storage"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	pb "github.com/tabularasa31/citymanager/api/gen"
+	"github.com/tabularasa31/citymanager/internal/storage"
 )
 
 func TestInMemoryStorage(t *testing.T) {

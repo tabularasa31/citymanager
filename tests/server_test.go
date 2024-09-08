@@ -2,13 +2,13 @@ package test
 
 import (
 	"context"
-	"github.com/tabularasa31/citymanager/internal/server"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	pb "github.com/tabularasa31/citymanager/api/gen"
+	"github.com/tabularasa31/citymanager/internal/server"
 )
 
 type MockStorage struct {

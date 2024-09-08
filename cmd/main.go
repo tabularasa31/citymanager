@@ -16,21 +16,25 @@ import (
 )
 
 func main() {
-	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	lis, err := net.Listen("tcp", "0.0.0.0:50051") // #nosec G102
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	ip := getOutboundIP()
+	ip, err := getOutboundIP()
+	if err != nil {
+		log.Fatalf("Failed to get outbound IP: %v", err)
+	}
+	fmt.Printf("Outbound IP: %s\n", ip)
 
 	store := storage.NewInMemoryStorage()
-	geocoder := geocoder.NewOpenStreetMapGeocoder()
-	srv := server.NewCityManagerServer(store, geocoder)
+	geoClient := geocoder.NewOpenStreetMapGeocoder()
+	srv := server.NewCityManagerServer(store, geoClient)
 
 	s := grpc.NewServer()
 	pb.RegisterCityManagerServer(s, srv)
 
-	// Реализация Grasefull shutdown
+	// Реализация Graceful shutdown
 	// Канал для получения сигналов от операционной системы
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
@@ -51,14 +55,22 @@ func main() {
 	fmt.Println("gRPC server stopped gracefully")
 }
 
-func getOutboundIP() net.IP {
+func getOutboundIP() (net.IP, error) {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("failed to establish connection: %w", err)
 	}
-	defer conn.Close()
+	defer func() {
+		closeErr := conn.Close()
+		if closeErr != nil {
+			log.Printf("Error closing connection: %v", closeErr)
+		}
+	}()
 
-	localAddr := conn.LocalAddr().(*net.UDPAddr)
+	localAddr, ok := conn.LocalAddr().(*net.UDPAddr)
+	if !ok {
+		return nil, fmt.Errorf("failed to get local address")
+	}
 
-	return localAddr.IP
+	return localAddr.IP, nil
 }

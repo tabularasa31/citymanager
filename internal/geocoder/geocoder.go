@@ -34,18 +34,27 @@ func (g *OpenStreetMapGeocoder) SetBaseURL(baseURL string) {
 }
 
 func (g *OpenStreetMapGeocoder) Geocode(ctx context.Context, cityName string) (float64, float64, error) {
-	url := fmt.Sprintf("%s/search?q=%s+city&format=json&featuretype=city&limit=1", g.baseURL, url.QueryEscape(cityName))
+	requestURL := fmt.Sprintf("%s/search?q=%s+city&format=json&featuretype=city&limit=1", g.baseURL, url.QueryEscape(cityName))
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", requestURL, nil)
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to create request: %v", err)
+		return 0, 0, fmt.Errorf("failed to create request: %w", err)
 	}
 
 	resp, err := g.client.Do(req)
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to send request: %v", err)
+		return 0, 0, fmt.Errorf("failed to send request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		closeErr := resp.Body.Close()
+		if closeErr != nil {
+			if err != nil {
+				err = fmt.Errorf("%w; failed to close response body: %w", err, closeErr)
+			} else {
+				err = fmt.Errorf("failed to close response body: %w", closeErr)
+			}
+		}
+	}()
 
 	var result []struct {
 		Lat string `json:"lat"`
@@ -53,7 +62,7 @@ func (g *OpenStreetMapGeocoder) Geocode(ctx context.Context, cityName string) (f
 	}
 
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return 0, 0, fmt.Errorf("failed to decode response: %v", err)
+		return 0, 0, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	if len(result) == 0 {
@@ -62,12 +71,12 @@ func (g *OpenStreetMapGeocoder) Geocode(ctx context.Context, cityName string) (f
 
 	lat, err := strconv.ParseFloat(result[0].Lat, 64)
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to parse latitude: %v", err)
+		return 0, 0, fmt.Errorf("failed to parse latitude: %w", err)
 	}
 
 	lon, err := strconv.ParseFloat(result[0].Lon, 64)
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to parse longitude: %v", err)
+		return 0, 0, fmt.Errorf("failed to parse longitude: %w", err)
 	}
 
 	return lat, lon, nil
