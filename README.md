@@ -39,14 +39,14 @@ Where:
 
 ### Prerequisites
 
-- Go (version 1.23 or higher)
+- Go (version 1.23.1 or higher)
 - Make
 
 ### Installation
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/citymanager.git
+   git clone https://github.com/tabularasa31/citymanager.git
    ```
 2. Navigate to the project directory:
    ```
