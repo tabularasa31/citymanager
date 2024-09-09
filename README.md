@@ -39,7 +39,7 @@ Where:
 
 ### Prerequisites
 
-- Go (version X.X or higher)
+- Go (version 1.23 or higher)
 - Make
 
 ### Installation
